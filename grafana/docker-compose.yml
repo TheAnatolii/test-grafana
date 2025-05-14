@@ -1,0 +1,101 @@
+version: "3.8"
+
+services:
+  web:
+    build: ./src
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    # install requirements.txt
+
+    volumes:
+      - ./src/:/usr/src/app/
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@db/hello_fastapi_dev
+    depends_on:
+      - db
+    labels:
+      - "logging=promtail"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:13.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_fastapi
+      - POSTGRES_PASSWORD=hello_fastapi
+      - POSTGRES_DB=hello_fastapi_dev
+
+    ports:
+      - "5432:5432"
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prom
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus_data/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana-1
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - loki
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki_data:/loki
+      - ./loki_config:/etc/loki
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - /var/log:/var/log
+      - ./promtail_config:/etc/promtail
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+volumes:
+  prometheus_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./prometheus_data
+  grafana_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./grafana_data
+  postgres_data:
+  loki_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./loki_data
+
+networks:
+  default:
+    name: hello_fastapi
