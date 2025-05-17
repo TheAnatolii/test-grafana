@@ -15,7 +15,7 @@ scrape_configs:
         refresh_interval: 5s
         filters:
           - name: name
-            values: ['fast-api-grafana-starter-web-1', 'web']
+            values: ['web', 'web2']
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
@@ -34,6 +34,8 @@ scrape_configs:
             method: method
             client: client
             error: error
+            duration: duration
+            service_name: service_name
       - timestamp:
           source: timestamp
           format: "2006-01-02 15:04:05,000"
@@ -45,4 +47,12 @@ scrape_configs:
           url:
           method:
           client:
-          error: 
+          error:
+          service_name:
+      - metrics:
+          duration:
+            type: Histogram
+            description: "Request duration in seconds"
+            source: duration
+            config:
+              buckets: [0.1, 0.5, 1, 2, 5] 

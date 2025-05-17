@@ -16,13 +16,24 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short"
+                    "unit": "short",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": null,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
                 },
                 "overrides": []
             },
             "gridPos": {
                 "h": 8,
-                "w": 8,
+                "w": 12,
                 "x": 0,
                 "y": 0
             },
@@ -45,13 +56,13 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "sum by (method) (count_over_time({container=\"web\", method=~\".+\"} [1m]))",
-                    "legendFormat": "{{method}}",
+                    "expr": "sum by (container, method) (count_over_time({container=~\"web.*\", method=~\".+\"} [1m] | json | __error__=\"\"))",
+                    "legendFormat": "{{container}} - {{method}}",
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "Количество запросов по методам",
+            "title": "Количество запросов по методам (оба сервиса)",
             "type": "timeseries"
         },
         {
@@ -61,14 +72,25 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short"
+                    "unit": "short",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": null,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
                 },
                 "overrides": []
             },
             "gridPos": {
                 "h": 8,
-                "w": 8,
-                "x": 8,
+                "w": 12,
+                "x": 12,
                 "y": 0
             },
             "id": 2,
@@ -90,8 +112,8 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "sum by (status_code) (count_over_time({container=\"web\", status_code=~\"4..\"} [1m]))",
-                    "legendFormat": "4xx",
+                    "expr": "sum by (container, status_code) (count_over_time({container=~\"web.*\", status_code=~\"4..\"} [1m] | json | __error__=\"\"))",
+                    "legendFormat": "{{container}} - 4xx",
                     "queryType": "range",
                     "refId": "A"
                 },
@@ -101,13 +123,13 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "sum by (status_code) (count_over_time({container=\"web\", status_code=~\"5..\"} [1m]))",
-                    "legendFormat": "5xx",
+                    "expr": "sum by (container, status_code) (count_over_time({container=~\"web.*\", status_code=~\"5..\"} [1m] | json | __error__=\"\"))",
+                    "legendFormat": "{{container}} - 5xx",
                     "queryType": "range",
                     "refId": "B"
                 }
             ],
-            "title": "Ошибки (4xx, 5xx)",
+            "title": "Ошибки по сервисам (4xx, 5xx)",
             "type": "timeseries"
         },
         {
@@ -117,52 +139,18 @@
             },
             "fieldConfig": {
                 "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 8,
-                "x": 16,
-                "y": 0
-            },
-            "id": 3,
-            "options": {
-                "legend": {
-                    "showLegend": true,
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
-                }
-            },
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "loki",
-                        "uid": "loki"
-                    },
-                    "editorMode": "code",
-                    "expr": "topk(5, sum by (url) (count_over_time({container=\"web\", url=~\".+\"} [1m])))",
-                    "legendFormat": "{{url}}",
-                    "queryType": "range",
-                    "refId": "A"
-                }
-            ],
-            "title": "Топ-5 эндпоинтов",
-            "type": "timeseries"
-        },
-        {
-            "datasource": {
-                "type": "loki",
-                "uid": "loki"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
+                    "unit": "s",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": null,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
                 },
                 "overrides": []
             },
@@ -172,7 +160,7 @@
                 "x": 0,
                 "y": 8
             },
-            "id": 4,
+            "id": 6,
             "options": {
                 "legend": {
                     "showLegend": true,
@@ -191,13 +179,13 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "sum by (status_code) (count_over_time({container=\"web\", status_code=~\".+\"} [1m]))",
-                    "legendFormat": "{{status_code}}",
+                    "expr": "avg by (container) (rate({container=~\"web.*\"} | json | unwrap duration | __error__=\"\" [1m]))",
+                    "legendFormat": "{{container}}",
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "Количество запросов по статус-кодам",
+            "title": "Среднее время ответа по сервисам",
             "type": "timeseries"
         },
         {
@@ -206,7 +194,20 @@
                 "uid": "loki"
             },
             "fieldConfig": {
-                "defaults": {},
+                "defaults": {
+                    "unit": "reqps",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": null,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
+                },
                 "overrides": []
             },
             "gridPos": {
@@ -215,22 +216,18 @@
                 "x": 12,
                 "y": 8
             },
-            "id": 5,
+            "id": 7,
             "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
+                "legend": {
+                    "showLegend": true,
+                    "displayMode": "table",
+                    "placement": "bottom"
                 },
-                "textMode": "auto"
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
             },
-            "pluginVersion": "10.0.0",
             "targets": [
                 {
                     "datasource": {
@@ -238,36 +235,54 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "sum(count_over_time({container=\"web\", status_code=~\".+\"} [1m]))",
-                    "legendFormat": "Запросы",
+                    "expr": "sum by (container) (rate({container=~\"web.*\"} | json | __error__=\"\" [1m]))",
+                    "legendFormat": "{{container}}",
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "Общее количество запросов",
-            "type": "stat"
+            "title": "Запросов в секунду по сервисам",
+            "type": "timeseries"
         },
         {
             "datasource": {
                 "type": "loki",
                 "uid": "loki"
             },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": 100,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
+                },
+                "overrides": []
+            },
             "gridPos": {
                 "h": 8,
-                "w": 24,
+                "w": 12,
                 "x": 0,
                 "y": 16
             },
-            "id": 6,
+            "id": 8,
             "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": true,
-                "showCommonLabels": true,
-                "showLabels": true,
-                "showTime": true,
-                "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "legend": {
+                    "showLegend": true,
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
             },
             "targets": [
                 {
@@ -276,46 +291,87 @@
                         "uid": "loki"
                     },
                     "editorMode": "code",
-                    "expr": "{container=\"web\"}",
+                    "expr": "sum by (container) (rate({container=~\"web.*\", status_code=~\"2..\"} | json | __error__=\"\" [1m])) / sum by (container) (rate({container=~\"web.*\"} | json | __error__=\"\" [1m])) * 100",
+                    "legendFormat": "{{container}}",
                     "queryType": "range",
                     "refId": "A"
                 }
             ],
-            "title": "Детальные логи",
-            "type": "logs"
+            "title": "Процент успешных запросов (2xx) по сервисам",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "short",
+                    "custom": {
+                        "axisPlacement": "auto",
+                        "axisLabel": "",
+                        "axisSoftMin": 0,
+                        "axisSoftMax": null,
+                        "axisMin": null,
+                        "axisMax": null,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 16
+            },
+            "id": 9,
+            "options": {
+                "legend": {
+                    "showLegend": true,
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    },
+                    "editorMode": "code",
+                    "expr": "topk(5, sum by (container, url) (count_over_time({container=~\"web.*\", url=~\".+\"} [1m] | json | __error__=\"\")))",
+                    "legendFormat": "{{container}} - {{url}}",
+                    "queryType": "range",
+                    "refId": "A"
+                }
+            ],
+            "title": "Топ-5 эндпоинтов по сервисам",
+            "type": "timeseries"
         }
     ],
     "refresh": "5s",
     "schemaVersion": 38,
     "style": "dark",
-    "tags": [
-        "fastapi",
-        "logs"
-    ],
+    "tags": [],
     "templating": {
         "list": []
     },
     "time": {
-        "from": "now-15m",
+        "from": "now-1h",
         "to": "now"
     },
-    "timepicker": {
-        "refresh_intervals": [
-            "5s",
-            "10s",
-            "30s",
-            "1m",
-            "5m",
-            "15m",
-            "30m",
-            "1h",
-            "2h",
-            "1d"
-        ]
-    },
+    "timepicker": {},
     "timezone": "",
-    "title": "FastAPI Информативные логи",
-    "uid": "fastapi-info-logs",
+    "title": "FastAPI Monitoring Dashboard",
+    "uid": "fastapi",
     "version": 1,
     "weekStart": ""
 }

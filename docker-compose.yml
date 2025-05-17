@@ -12,6 +12,28 @@ services:
       - "8002:8000"
     environment:
       - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@db/hello_fastapi_dev
+      - SERVICE_NAME=web1
+    depends_on:
+      - db
+    labels:
+      - "logging=promtail"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web2:
+    build: ./src
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    container_name: web2
+    volumes:
+      - ./src/:/usr/src/app/
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@db/hello_fastapi_dev
+      - SERVICE_NAME=web2
     depends_on:
       - db
     labels:
